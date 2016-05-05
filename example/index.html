@@ -17,6 +17,9 @@
         </script>
 
         <style type="text/css">
+            * {
+                box-sizing: border-box;
+            }
             body {
                 margin: 0px;
                 padding: 0px;
@@ -27,6 +30,7 @@
                 width: 100%;
                 background-color: #52A;
                 height: 100px;
+                z-index: 10;
             }
             .header {
                 top: 0px;
@@ -40,19 +44,34 @@
             }
 
             .body {
-                min-height: 750px;
+                min-height: 1500px;
                 width: 100%;
-                background-color: #999;
-                padding-top: 123px;
+                background-color: #000;
             }
 
             .demo {
+                position: fixed;
+                width: 100%;
                 height: 50px;
-                background-color: #0FF;
+                z-index: 5;
+
+                background-color: #0F0;
             }
             .demo.scrollable-style {
-                border: 5px solid #FF0;
+                border: 5px solid #0A0;
+            }
+            .demo.top {
+                top: 100px;
+            }
+            .demo.top.scrollable-style {
                 border-top-width: 2px;
+            }
+
+            .demo.bottom {
+                bottom: 100px;
+            }
+            .demo.bottom.scrollable-style {
+                border-bottom-width: 2px;
             }
         </style>
     </head>
@@ -66,7 +85,9 @@
             <label for="enableScrollStyles">Enable Scrollable Styles</label><input id="enableScrollStyles" type="checkbox" ng-model="enableScrollStyles" />
         </div>
         <div class="body" ng-if="showDemo">
-            <div class="demo" ng-scrollable-style ng-scrollable-style-enabled="{{enableScrollStyles}}">
+            <div class="demo top" ng-scrollable-style="{'marginTop': {start: '0px', end: '-50px', delta: 50, delay: 10}, 'opacity': {start: 1.0, end: 0.5, delta: 25}}" ng-scrollable-style-enabled="{{enableScrollStyles}}">
+            </div>
+            <div class="demo bottom" ng-scrollable-style="{'marginBottom': {start: '0px', end: '-50px'}, 'opacity': {start: 1.0, end: 0.5, delta: 0, delay: 10}}" ng-scrollable-style-enabled="{{enableScrollStyles}}" ng-scrollable-style-delay="25" ng-scrollable-style-delta="50">
             </div>
         </div>
         <div class="footer" id="footer"></div>
