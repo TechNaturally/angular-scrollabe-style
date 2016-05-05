@@ -32,6 +32,7 @@ Add the `ng-scrollable-style-delta` attribute to set default delta.
 * `ng-scrollable-style-enabled` - toggle the feature on or off
 * `ng-scrollable-style-delay` - set default delay (used on style properties that don't set their own)
 * `ng-scrollable-style-delta` - set default delta (used on style properties that don't set their own)
+* `ng-scrollable-style-on-child` - set if you need to transition the properties on the first child (ex. in case of an element directive)
 
 #### Property Configuration Object
 Object keyed by style property and configured with:
