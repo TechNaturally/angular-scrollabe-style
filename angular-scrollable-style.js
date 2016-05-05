@@ -180,7 +180,14 @@ angular.module('angular-scrollable-style', [])
 		require: 'ngScrollableStyle',
 		controller: 'ScrollableStyleController',
 		link: function(scope, elem, attr, Ctrl){
-			Ctrl.setElement(elem);
+			var useElement = elem;
+			if(angular.isDefined(attr['ngScrollableStyleOnChild'])){
+				var children = elem.children();
+				if(children && children.length){
+					useElement = angular.element(children[0]);
+				}
+			}
+			Ctrl.setElement(useElement);
 
 			function setScrollableStyle(style){
 				if(angular.isDefined(style)){
