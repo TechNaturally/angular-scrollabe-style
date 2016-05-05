@@ -1,34 +1,95 @@
 angular.module('angular-scrollable-style', [])
-.controller('ScrollableStyleController', ['$scope', function($scope){
+.controller('ScrollableStyleController', ['$scope', '$window', function($scope, $window){
 	var self = this;
-	this.enabled = true;
+	var windowElem = angular.element($window);
+	var scrollWatched, lastScroll;
+	self.enabled;
 
-	this.setElement = function(element){
-		this.$element = element;
-		if(this.$element && this.enabled){
-			this.$element.addClass('scrollable-style');
+	var origCss = {};
+	function resetCss(){
+		if(self.$element){
+			for(var prop in origCss){
+				self.$element.css(prop, origCss[prop]);
+			}
+		}
+	}
+	function setCss(prop, value){
+		if(self.$element){
+			if(angular.isUndefined(origCss[prop])){
+				origCss[prop] = self.$element[0].style[prop];
+			}
+		}
+	}
+
+	self.handleScroll = function(distance, scrollY){
+		console.log('handle scroll by '+distance+' TO '+scrollY);
+	};
+
+	function scrolled(event){
+		var scrollDistance = $window.scrollY;
+		if(angular.isDefined(lastScroll)){
+			scrollDistance -= lastScroll;
+		}
+		lastScroll = $window.scrollY;
+		self.handleScroll(scrollDistance, lastScroll);
+	}
+	function initScrollWatch(){
+		if(!scrollWatched){
+			windowElem.on('scroll', scrolled);
+			scrollWatched = true;
+		}
+	}
+	function removeScrollWatch(){
+		if(scrollWatched){
+			windowElem.off('scroll', scrolled);
+			scrollWatched = undefined;
+			lastScroll = undefined;
+		}
+	}
+
+	self.setElement = function(element){
+		resetElement();
+		self.$element = element;
+		initElement();
+	};
+	function initElement(){
+		if(self.$element){
+			self.$element.addClass('scrollable-style');
+			origCss = {};
+		}
+	}
+	function resetElement(){
+		if(self.$element){
+			resetCss();
+			self.$element.removeClass('scrollable-style');
+		}
+	}
+
+	self.setEnabled = function(enable){
+		if(angular.isUndefined(enable)){
+			enable = true;
+		}
+		if(enable && !self.enabled){
+			self.enabled = enable;
+			initElement();
+			initScrollWatch();
+		}
+		else if(!enable && self.enabled){
+			self.enabled = enable;
+			self.destroy();
 		}
 	};
 
-	this.setEnabled = function(enable){
-		if(enable && !this.enabled){
-			if(this.$element){
-				this.$element.addClass('scrollable-style');
-			}
-			this.enabled = enable;
-		}
-		else if(!enable && this.enabled){
-			if(this.$element){
-				this.$element.removeClass('scrollable-style');
-			}
-			this.enabled = enable;
-		}
+	self.destroy = function(){
+		resetElement();
+		removeScrollWatch();
 	};
 }])
 .directive('ngScrollableStyle', [function(){
 	return {
 		restrict: 'A',
 		require: 'ngScrollableStyle',
+		controller: 'ScrollableStyleController',
 		link: function(scope, elem, attr, Ctrl){
 			Ctrl.setElement(elem);
 
@@ -43,7 +104,8 @@ angular.module('angular-scrollable-style', [])
 			}
 			setEnabled(attr['ngScrollableStyleEnabled']);
 			attr.$observe('ngScrollableStyleEnabled', setEnabled);
-		},
-		controller: 'ScrollableStyleController'
+
+			elem.on('$destroy', Ctrl.destroy);
+		}
 	};
 }]);
