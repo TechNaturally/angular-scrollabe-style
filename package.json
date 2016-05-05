@@ -1,0 +1,23 @@
+{
+  "name": "angular-scrollable-style",
+  "version": "0.0.1",
+  "main": "angular-scrollable-style.js",
+  "description": "Angular directive to transition element style properties on window scroll.",
+  "homepage": "https://github.com/TechNaturally/angular-scrollable-style",
+  "contributors": [
+    "Pat Long <plong00@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TechNaturally/angular-scrollable-style.git"
+  },
+  "keywords": [
+    "angularjs",
+    "stretch"
+  ],
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ]
+}

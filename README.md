@@ -1,2 +1,2 @@
-# angular-scrollabe-style
-transition element style properties on scroll
+# angular-scrollable-style
+Angular directive to transition element style properties on window scroll.

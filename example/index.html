@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="example">
+    <head>
+        <meta charset="utf-8">
+        <title>Angular Scrollable Style</title>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.10/angular.js"></script>
+
+        <script src="../angular-scrollable-style.js"></script>
+
+        <script type="text/javascript">
+            angular.module('example', ['angular-scrollable-style']).
+            controller('DemoController', ['$scope', function($scope){
+                $scope.showDemo = true;
+                $scope.enableScrollStyles = true;
+            }]);
+        </script>
+
+        <style type="text/css">
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+            .header,
+            .footer {
+                position: fixed;
+                width: 100%;
+                background-color: #52A;
+                height: 120px;
+            }
+            .header {
+                top: 0px;
+                padding: 10px 15px;
+                border-bottom: 3px solid #9F0;
+                color: #9F0;
+            }
+            .footer {
+                bottom: 0px;
+                border-top: 3px solid #9F0;
+            }
+
+            .body {
+                min-height: 750px;
+                width: 100%;
+                background-color: #999;
+                padding-top: 143px;
+            }
+
+            .demo {
+                height: 50px;
+                background-color: #0FF;
+            }
+            .demo.scrollable-style {
+                border: 5px solid #FF0;
+                border-top: 0px none transparent;
+            }
+        </style>
+    </head>
+    <body ng-controller="DemoController">
+        <div class="header" id="header">
+            <div style="float:right;">
+                
+            </div>
+
+            <label for="showDemo">Show Demo</label><input id="showDemo" type="checkbox" ng-model="showDemo" /><br/>
+            <label for="enableScrollStyles">Enable Scrollable Styles</label><input id="enableScrollStyles" type="checkbox" ng-model="enableScrollStyles" />
+        </div>
+        <div class="body" ng-if="showDemo">
+            <div class="demo" ng-scrollable-style ng-scrollable-style-enabled="{{enableScrollStyles}}">
+            </div>
+        </div>
+        <div class="footer" id="footer"></div>
+    </body>
+</html>
