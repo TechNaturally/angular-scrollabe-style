@@ -1,6 +1,6 @@
 {
   "name": "angular-scrollable-style",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "main": "angular-scrollable-style.js",
   "description": "Angular directive to transition element style properties on window scroll.",
   "homepage": "https://github.com/TechNaturally/angular-scrollable-style",
