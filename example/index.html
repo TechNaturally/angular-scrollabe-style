@@ -13,6 +13,7 @@
             controller('DemoController', ['$scope', function($scope){
                 $scope.showDemo = true;
                 $scope.enableScrollStyles = true;
+                $scope.boxSpeed = 250;
             }]);
         </script>
 
@@ -50,48 +51,167 @@
             }
 
             .demo {
-                position: fixed;
-                width: 100%;
-                height: 50px;
-                z-index: 5;
-
                 background-color: #0F0;
             }
             .demo.scrollable-style {
                 border: 5px solid #0A0;
             }
-            .demo.top {
-                top: 100px;
-                transition: margin-top 0.1s linear;
+
+            .demo.bar {
+                position: fixed;
+                width: 100%;
+                height: 125px;
+                z-index: 5;
             }
-            .demo.top.scrollable-style {
+
+            .demo.bar.top {
+                top: 100px;
+                transition: margin-top 0.5s ease-in;
+            }
+            .demo.bar.top.scrollable-style {
                 border-top-width: 2px;
             }
 
-            .demo.bottom {
+            .demo.bar.bottom {
                 bottom: 100px;
-                transition: margin-bottom 0.1s linear;
+                transition: margin-bottom 0.5s ease-in;
             }
-            .demo.bottom.scrollable-style {
+            .demo.bar.bottom.scrollable-style {
                 border-bottom-width: 2px;
             }
+
+            .demo.line {
+                height: 12px;
+                background-color: #36C;
+                border-top: 1px solid #FFF;
+                border-bottom: 1px solid #FFF;
+            }
+            .demo.line > div {
+                height: 100%;
+                transition: all 0.1s linear;
+                border-top: 3px solid #09C;
+                border-bottom: 3px solid #09C;
+            }
+
+            .demo.block {
+                position: absolute;
+                width: 25px;
+                height: 25px;
+                background-color: #CE0;
+                border-radius: 50%;
+            }
+            .demo.block.scrollable-style {
+                border: 3px solid #780;
+            }
+
+            .header .demo.line,
+            .footer .demo.line {
+                position: absolute;
+                left: 8px;
+                right: 8px;
+            }
+
+            .header .demo.line {
+                bottom: 10px;
+            }
+            .footer .demo.line {
+                top: 10px;
+            }
+            .footer .demo.line > div {
+                position: absolute;
+                right: 0px;
+            }
+
+            .sliders {
+                position: fixed;
+                width: 100%;
+                top: 100px;
+                bottom: 100px;
+                border: 6px dotted #666;
+                border-width: 3px 6px;
+                border-style: dashed dotted;
+                z-index: 4;
+            }
+
+            .sliders .demo.block {
+                transition: left 1.0s ease-in-out, width 0.1s ease-in, height 0.1s ease-in;
+                transform: translateY(-50%);
+            }
+
+            .sliders .demo.block.slider-1 {
+                top: 33%;
+            }
+            .sliders .demo.block.slider-2 {
+                top: 50%;
+            }
+            .sliders .demo.block.slider-3 {
+                top: 67%;
+            }
+
+            .demo.box {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 17.6%;
+                height: 100px;
+
+                border: 8px solid #960;
+                background-color: #F90;
+            }
+            .demo.box.box-1 {
+                left: 2%;
+            }
+            .demo.box.box-2 {
+                left: 21.6%;
+            }
+            .demo.box.box-3 {
+                left: 41.2%;
+            }
+            .demo.box.box-4 {
+                left: 60.8%;
+            }
+            .demo.box.box-5 {
+                left: 80.4%;
+            }
+            
         </style>
     </head>
     <body ng-controller="DemoController">
         <div class="header" id="header">
             <div style="float:right;">
-                
+                <!-- top-right corner block -->
+                <label for="boxSpeed">Box Speed</label>
+                <select id="boxSpeed" ng-model="boxSpeed" ng-options="o as o for o in [50,75,150,250,500]"></select>
             </div>
 
             <label for="showDemo">Show Demo</label><input id="showDemo" type="checkbox" ng-model="showDemo" /><br/>
             <label for="enableScrollStyles">Enable Scrollable Styles</label><input id="enableScrollStyles" type="checkbox" ng-model="enableScrollStyles" />
+
+            <div class="demo line" ng-scrollable-style="{ delay:{on:'0',off:0}, delta:'100%', 'width':{init:'0%',apply:'100%'}, 'backgroundColor':{init:'#09F',apply:'#FFF'}, 'borderColor':{init:'#FFF',apply:'#000'}, 'borderWidth':{init:'4px',apply:'1px'} }" ng-scrollable-style-on-child="true"><div></div></div>
         </div>
         <div class="body" ng-if="showDemo">
-            <div class="demo top" ng-scrollable-style="{'marginTop': {start: '0px', end: '-50px', delta: 50, delay: 10}, 'opacity': {start: 1.0, end: 0.5, delta: 25}}" ng-scrollable-style-enabled="{{enableScrollStyles}}">
+            <div class="demo bar top" ng-scrollable-style="{ 'marginTop':{init:'0px',apply:'-125px',delay:{on:64,off:16}}, 'opacity':{init:1.0,apply:0.75,delta:{on:50,off:16}} }" ng-scrollable-style-enabled="{{enableScrollStyles}}">
             </div>
-            <div class="demo bottom" ng-scrollable-style="{'marginBottom': {start: '0px', end: '-50px'}, 'opacity': {start: 1.0, end: 0.5, delta: 0, delay: 10}}" ng-scrollable-style-enabled="{{enableScrollStyles}}" ng-scrollable-style-delay="16" ng-scrollable-style-delta="50">
+
+            <div class="sliders">
+                <div class="demo box box-1" ng-scrollable-style="{ 'delay':{on:'@0%',off:'@20%'}, 'delta':{on:'@20%',off:'@0%'}, 'backgroundColor':{init:'#F90',apply:'#FFF'} }"></div>
+                <div class="demo box box-2" ng-scrollable-style="{ 'delay':{on:'@20%',off:'@40%'}, 'delta':{on:'@40%',off:'@20%'}, 'backgroundColor':{init:'#F90',apply:'#FFF'} }"></div>
+                <div class="demo box box-3" ng-scrollable-style="{ 'delay':{on:'@40%',off:'@60%'}, 'delta':{on:'@60%',off:'@40%'}, 'backgroundColor':{init:'#F90',apply:'#FFF'} }"></div>
+                <div class="demo box box-4" ng-scrollable-style="{ 'delay':{on:'@60%',off:'@80%'}, 'delta':{on:'@80%',off:'@60%'}, 'backgroundColor':{init:'#F90',apply:'#FFF'} }"></div>
+                <div class="demo box box-5" ng-scrollable-style="{ 'delay':{on:'@80%',off:'@100%'}, 'delta':{on:'@100%',off:'@80%'}, 'backgroundColor':{init:'#F90',apply:'#FFF'} }"></div>
+
+                <div class="demo block slider-1" ng-scrollable-style="{ 'left':{init:'6%',apply:'90%', delta:0,delay:{on:{{boxSpeed+10}},off:10}}, 'backgroundColor':{init:'#CE0',apply:'#F00'}, 'borderColor':{init:'#780',apply:'#FF0'}, 'width':{init:'25px',apply:'100px'}, 'height':{init:'25px',apply:'100px'} }" ng-scrollable-style-delay="{on:10,off:15}" ng-scrollable-style-delta="{on:{{boxSpeed}},off:0}" ng-scrollable-style-enabled="{{enableScrollStyles}}"></div>
+
+                <div class="demo block slider-2" ng-scrollable-style="{ 'left':{init:'10%',apply:'90%', delta:0,delay:{on:{{boxSpeed+(boxSpeed+10)*0.75}},off:30}}, 'backgroundColor':{init:'#CE0',apply:'#F00'}, 'borderColor':{init:'#780',apply:'#FF0'}, 'width':{init:'25px',apply:'100px'}, 'height':{init:'25px',apply:'100px'} }" ng-scrollable-style-delay="{on:{{(boxSpeed+10)*0.75}},off:15}" ng-scrollable-style-delta="{on:{{boxSpeed}},off:0}" ng-scrollable-style-enabled="{{enableScrollStyles}}"></div>
+
+                <div class="demo block slider-3" ng-scrollable-style="{ 'left':{init:'14%',apply:'90%', delta:0,delay:{on:{{boxSpeed+(boxSpeed*1.5)}},off:50}}, 'backgroundColor':{init:'#CE0',apply:'#F00'}, 'borderColor':{init:'#780',apply:'#FF0'}, 'width':{init:'25px',apply:'100px'}, 'height':{init:'25px',apply:'100px'} }" ng-scrollable-style-delay="{on:{{boxSpeed*1.5}},off:15}" ng-scrollable-style-delta="{on:{{boxSpeed}},off:0}" ng-scrollable-style-enabled="{{enableScrollStyles}}"></div>
+            </div>
+
+            <div class="demo bar bottom" ng-scrollable-style="{ 'marginBottom':{init:'0px',apply:'-125px',delay:{on:34,off:16}}, 'opacity':{init:1.0,apply:0.5,delta:{on:50,off:16}} }" ng-scrollable-style-enabled="{{enableScrollStyles}}">
             </div>
         </div>
-        <div class="footer" id="footer"></div>
+        <div class="footer" id="footer">
+            <div class="demo line" ng-scrollable-style="{ delay:{on:'0',off:0}, delta:'100%', 'width':{init:'0%',apply:'100%'}, 'backgroundColor':{init:'#09F',apply:'#FFF'}, 'borderColor':{init:'#FFF',apply:'#000'}, 'borderWidth':{init:'4px',apply:'1px'} }" ng-scrollable-style-on-child="true"><div></div></div>
+        </div>
     </body>
 </html>
