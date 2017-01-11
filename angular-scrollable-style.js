@@ -23,6 +23,13 @@ angular.module('angular-scrollable-style', [])
 	PROP_STATE_TICK_SETTING[ PROP_STATES.APPLIED ]   = 'delay.off';
 	PROP_STATE_TICK_SETTING[ PROP_STATES.RESETTING ] = 'delta.off';
 
+	function debug(){
+		return (self.$element && self.$element.hasClass('debug'));
+	}
+	function debugPrefix(prop){
+		return '['+(self.$element ? self.$element[0].className.replace(/(^|\s)scrollable-style(-\S+)?/g, '') : 'scrollable-style')+']'+(prop?'.('+prop+')':'')+'=> ';
+	}
+
 	function parseDynamicCssValue(cssValue){
 		if(cssValue && angular.isString(cssValue)){
 			cssValue = cssValue.replace(/\$height\$/g, getElementHeight);
