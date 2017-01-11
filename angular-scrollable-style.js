@@ -1,5 +1,5 @@
 angular.module('angular-scrollable-style', [])
-.controller('ScrollableStyleController', ['$scope', '$window', function($scope, $window){
+.controller('ScrollableStyleController', ['$scope', '$window', '$timeout', function($scope, $window, $timeout){
 	var self = this;
 	var windowElem = angular.element($window);
 	var scrollWatched, lastScroll, lastScrollDelta;
@@ -151,30 +151,6 @@ angular.module('angular-scrollable-style', [])
 			}
 		}
 	};
-	self.initStyle = function(){
-		if(self.style){
-			for(var prop in self.style){
-				if(!self.style[prop]){
-					continue;
-				}
-
-				// reset state
-				if(angular.isUndefined(propState[prop])){
-					propState[prop] = {
-						state: PROP_STATES.DEFAULT,
-						ticks: 0
-					};
-				}
-				else{
-					propState[prop].state = PROP_STATES.DEFAULT;
-					propState[prop].ticks = 0;
-				}
-
-				// init style
-				self.applyStyle(prop, 0.0);
-			}
-		}
-	};
 
 	// main property-state handler
 	function handlePropState(prop, scrollDelta, scrollY, scrollHeight){
@@ -187,6 +163,8 @@ angular.module('angular-scrollable-style', [])
 			if(propState[prop].state == PROP_STATES.DEFAULT){
 				// waiting to apply
 				if(checkTick >= targetTick || scrollY >= scrollHeight){
+					// wait is over
+					// advance to APPLYING state
 					propState[prop].state = PROP_STATES.APPLYING;
 					propState[prop].ticks = (checkTick - targetTick);
 					if(propState[prop].ticks < 0){
@@ -288,7 +266,7 @@ angular.module('angular-scrollable-style', [])
 		}
 	}
 
-	self.handleScroll = function(scrollDelta, scrollY, scrollHeight){
+	self.handleScroll = function(scrollDelta, scrollY, scrollHeight, firstScroll){
 		var directionChanged = false;
 		if(angular.isDefined(lastScrollDelta)){
 			directionChanged = ( (lastScrollDelta < 0 && scrollDelta > 0) || (lastScrollDelta >= 0 && scrollDelta < 0) );
@@ -321,6 +299,18 @@ angular.module('angular-scrollable-style', [])
 				}
 				propState[prop].ticks += scrollDelta;
 
+				// special handling for first scroll event
+				if(firstScroll){
+					var absolute = isPropConfigAbsolute(prop, PROP_STATE_TICK_SETTING[ propState[prop].state ]);
+					// if it's the first scroll event for a non-absolute setting
+					if(!absolute){
+						// reset state ticks and scrollDelta
+						propState[prop].ticks -= scrollDelta;
+						checkTick = propState[prop].ticks;
+						scrollDelta = 0;
+					}
+				}
+
 				// pass the scroll event off to the state-handler
 				handlePropState(prop, scrollDelta, scrollY, scrollHeight);
 			}
@@ -328,12 +318,37 @@ angular.module('angular-scrollable-style', [])
 		lastScrollDelta = scrollDelta;
 	};
 
+	function initPropStates(){
+		if(self.style){
+			for(var prop in self.style){
+				if(!self.style[prop]){
+					continue;
+				}
+
+				// reset state
+				if(angular.isUndefined(propState[prop])){
+					propState[prop] = {
+						state: PROP_STATES.DEFAULT,
+						ticks: 0
+					};
+				}
+				else{
+					propState[prop].state = PROP_STATES.DEFAULT;
+					propState[prop].ticks = 0;
+				}
+
+				// init style
+				self.applyStyle(prop, 0.0);
+			}
+		}
+	}
+
 	function initElement(){
 		if(self.$element){
 			self.$element.addClass('scrollable-style');
 			origCss = {};
 			if(self.initialized){
-				self.initStyle();
+				initPropStates();
 			}
 		}
 	}
@@ -370,19 +385,37 @@ angular.module('angular-scrollable-style', [])
 						 document.documentElement.offsetHeight
 						) - $window.innerHeight;
 	}
+	var hasInitScroll = false;
 	function scrolled(event){
+		var initScroll = !hasInitScroll;
+		if(initScroll){
+			hasInitScroll = true;
+		}
 		var scrollDistance = 0;
-		if(angular.isDefined(lastScroll)){
+		if(angular.isUndefined(lastScroll)){
+			lastScroll = $window.scrollY;
+			lastScrollDelta = lastScroll;
+			scrollDistance = $window.scrollY;
+		}
+		else {
 			scrollDistance = $window.scrollY - lastScroll;
 		}
 		lastScroll = $window.scrollY;
-		self.handleScroll(scrollDistance, $window.scrollY, getScrollHeight());
+		self.handleScroll(scrollDistance, $window.scrollY, getScrollHeight(), initScroll);
 	}
 	function initScrollWatch(){
 		if(!scrollWatched){
+			lastScroll = undefined;
+			lastScrollDelta = 0;
+			hasInitScroll = false;
 			windowElem.on('scroll', scrolled);
 			scrollWatched = true;
-			lastScroll = $window.scrollY;
+
+			$timeout(function(){
+				if(!hasInitScroll){
+					scrolled();
+				}
+			});
 		}
 	}
 	function removeScrollWatch(){
@@ -390,6 +423,7 @@ angular.module('angular-scrollable-style', [])
 			windowElem.off('scroll', scrolled);
 			scrollWatched = undefined;
 			lastScroll = undefined;
+			lastScrollDelta = undefined;
 		}
 	}
 
@@ -429,8 +463,8 @@ angular.module('angular-scrollable-style', [])
 		}
 		if(enable && !self.enabled){
 			self.enabled = enable;
-			initElement();
 			initScrollWatch();
+			initElement();
 		}
 		else if(!enable && self.enabled){
 			self.enabled = enable;
@@ -441,7 +475,7 @@ angular.module('angular-scrollable-style', [])
 	self.setInitialized = function(initialized){
 		self.initialized = initialized;
 		if(self.initialized){
-			self.initStyle();
+			initPropStates();
 		}
 	};
 
