@@ -23,6 +23,28 @@ angular.module('angular-scrollable-style', [])
 	PROP_STATE_TICK_SETTING[ PROP_STATES.APPLIED ]   = 'delay.off';
 	PROP_STATE_TICK_SETTING[ PROP_STATES.RESETTING ] = 'delta.off';
 
+	function parseDynamicCssValue(cssValue){
+		if(cssValue && angular.isString(cssValue)){
+			cssValue = cssValue.replace(/\$height\$/g, getElementHeight);
+			cssValue = cssValue.replace(/\$width\$/g, getElementWidth);
+		}
+		return cssValue;
+	}
+	function getElementHeight(){
+		var value = 0;
+		if(self.$element){
+			value = self.$element[0].offsetHeight;
+		}
+		return value;
+	}
+	function getElementWidth(){
+		var value = 0;
+		if(self.$element){
+			value = self.$element[0].offsetWidth;
+		}
+		return value;
+	}
+
 	function getPropConfigValue(prop, opt){
 		var subOpt;
 		if(opt.substr(-3) == '.on'){
@@ -78,11 +100,13 @@ angular.module('angular-scrollable-style', [])
 		}
 		return isAbsolute;
 	}
-	
+
 	function parseCssValue(cssValue){
 		var value = cssValue;
 		var unit;
 		if(angular.isString(cssValue)){
+			cssValue = parseDynamicCssValue(cssValue);
+
 			// parse the CSS value into a value and a unit
 			if(cssValue.substr(0, 4)=='rgb(' || cssValue.substr(0, 5)=='rgba('){
 				// rgb/rgba colours
