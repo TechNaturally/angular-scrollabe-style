@@ -363,6 +363,9 @@ angular.module('angular-scrollable-style', [])
 	};
 
 	function initPropStates(){
+		if(!self.enabled){
+			return;
+		}
 		if(self.style){
 			for(var prop in self.style){
 				if(!self.style[prop]){
@@ -391,6 +394,9 @@ angular.module('angular-scrollable-style', [])
 	}
 
 	function initElement(){
+		if(!self.enabled){
+			return;
+		}
 		if(self.$element){
 			self.$element.addClass('scrollable-style');
 			origCss = {};
