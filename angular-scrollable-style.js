@@ -152,6 +152,22 @@ angular.module('angular-scrollable-style', [])
 		}
 	};
 
+	function assertPropStateClass(prop, stateClass){
+		var targetClass = 'scrollable-style-'+prop+'-'+stateClass;
+		if(propState[prop] && propState[prop].stateClass && propState[prop].stateClass != targetClass){
+			self.$element.removeClass(propState[prop].stateClass);
+			propState[prop].stateClass = undefined;
+		}
+
+		if(!self.$element.hasClass(targetClass)){
+			self.$element.addClass(targetClass);
+		}
+
+		if(propState[prop]){
+			propState[prop].stateClass = targetClass;
+		}
+	}
+
 	// main property-state handler
 	function handlePropState(prop, scrollDelta, scrollY, scrollHeight){
 		if(propState[prop]){
@@ -162,6 +178,7 @@ angular.module('angular-scrollable-style', [])
 
 			if(propState[prop].state == PROP_STATES.DEFAULT){
 				// waiting to apply
+				assertPropStateClass(prop, 'waiting');
 				if(checkTick >= targetTick || scrollY >= scrollHeight){
 					// wait is over
 					// advance to APPLYING state
@@ -175,6 +192,7 @@ angular.module('angular-scrollable-style', [])
 			}
 			else if(propState[prop].state == PROP_STATES.APPLYING){
 				// applying style
+				assertPropStateClass(prop, 'applying');
 				if(absolute){
 					checkTick = propState[prop].ticks;
 					targetTick -= (scrollY - propState[prop].ticks);
@@ -211,6 +229,7 @@ angular.module('angular-scrollable-style', [])
 			}
 			else if(propState[prop].state == PROP_STATES.APPLIED){
 				// style applied (waiting to reset)
+				assertPropStateClass(prop, 'applied');
 				if(absolute){
 					checkTick -= scrollHeight;
 					targetTick = scrollHeight - targetTick;
@@ -229,6 +248,7 @@ angular.module('angular-scrollable-style', [])
 			}
 			else if(propState[prop].state == PROP_STATES.RESETTING){
 				// resetting style
+				assertPropStateClass(prop, 'resetting');
 				if(absolute){
 					checkTick = propState[prop].ticks;
 					targetTick = (scrollY - propState[prop].ticks) - targetTick;
@@ -339,6 +359,9 @@ angular.module('angular-scrollable-style', [])
 
 				// init style
 				self.applyStyle(prop, 0.0);
+
+				// apply default waiting class
+				assertPropStateClass(prop, 'waiting');
 			}
 		}
 	}
@@ -371,6 +394,7 @@ angular.module('angular-scrollable-style', [])
 		if(self.$element){
 			resetCss();
 			self.$element.removeClass('scrollable-style');
+			self.$element[0].className = self.$element[0].className.replace(/(^|\s)scrollable-style-\S+/g, '');
 		}
 	}
 	function resetPropStates(){
