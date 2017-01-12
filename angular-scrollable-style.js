@@ -207,6 +207,10 @@ angular.module('angular-scrollable-style', [])
 			var targetTick = getPropConfig(prop, tickSetting);
 			var checkTick = (absolute ? scrollY : propState[prop].ticks);
 
+			if(debug()){
+				console.log(debugPrefix(prop)+'handlePropState('+propState[prop].state+')->['+tickSetting+'] @ '+checkTick+' / '+(absolute?'@':'')+targetTick+' !|! scroll @ d:'+scrollDelta+' | y:'+scrollY+' / '+scrollHeight);
+			}
+
 			if(propState[prop].state == PROP_STATES.DEFAULT){
 				// waiting to apply
 				assertPropStateClass(prop, 'waiting');
@@ -217,6 +221,9 @@ angular.module('angular-scrollable-style', [])
 					propState[prop].ticks = (checkTick - targetTick);
 					if(propState[prop].ticks < 0){
 						propState[prop].ticks = 0;
+					}
+					if(debug()){
+						console.log(debugPrefix(prop)+'-----********** !!!||!!! WAITING >-~*|*~-> APPLYING !!!|||!!!', angular.toJson(propState[prop]));
 					}
 					handlePropState(prop, scrollDelta, scrollY, scrollHeight);
 				}
@@ -239,6 +246,9 @@ angular.module('angular-scrollable-style', [])
 					if(propState[prop].ticks < 0){
 						propState[prop].ticks = 0;
 					}
+					if(debug()){
+						console.log(debugPrefix(prop)+'handlePropState !!!||!!! APPLYING >-~*|*~-> APPLIED !!!|||!!!', angular.toJson(propState[prop]));
+					}
 					handlePropState(prop, scrollDelta, scrollY, scrollHeight);
 				}
 				else if(propState[prop].ticks < 0 || scrollY <= 0){
@@ -249,6 +259,9 @@ angular.module('angular-scrollable-style', [])
 						// regress to DEFAULT/WAITING state
 						propState[prop].state = PROP_STATES.DEFAULT;
 						propState[prop].ticks = 0;
+						if(debug()){
+							console.log(debugPrefix(prop)+'handlePropState !!!||!!! WAITING <-*~|~*-< APPLYING !!!|||!!!', angular.toJson(propState[prop]));
+						}
 						handlePropState(prop, scrollDelta, scrollY, scrollHeight);
 					}
 				}
@@ -274,6 +287,9 @@ angular.module('angular-scrollable-style', [])
 					if(propState[prop].ticks > 0){
 						propState[prop].ticks = 0;
 					}
+					if(debug()){
+						console.log(debugPrefix(prop)+'handlePropState !!!||!!! APPLIED >-~*|*~-> RESETTING !!!|||!!!', angular.toJson(propState[prop]));
+					}
 					handlePropState(prop, scrollDelta, scrollY, scrollHeight);
 				}
 			}
@@ -296,6 +312,9 @@ angular.module('angular-scrollable-style', [])
 					if(propState[prop].ticks > 0){
 						propState[prop].ticks = 0;
 					}
+					if(debug()){
+						console.log(debugPrefix(prop)+'handlePropState !!!||!!! RESETTING >-~*|*~-> WAITING !!!|||!!!', angular.toJson(propState[prop]));
+					}
 					handlePropState(prop, scrollDelta, scrollY, scrollHeight);
 				}
 				else if(propState[prop].ticks > 0 || scrollY >= scrollHeight){
@@ -306,6 +325,9 @@ angular.module('angular-scrollable-style', [])
 						// regress to APPLIED (waiting to reset) state
 						propState[prop].state = PROP_STATES.APPLIED;
 						propState[prop].ticks = 0;
+						if(debug()){
+							console.log(debugPrefix(prop)+'handlePropState !!!||!!! APPLIED <-*~|~*-< RESETTING !!!|||!!!', angular.toJson(propState[prop]));
+						}
 						handlePropState(prop, scrollDelta, scrollY, scrollHeight);
 					}
 				}
