@@ -203,7 +203,7 @@ angular.module('angular-scrollable-style', [])
 			if(propState[prop].state == PROP_STATES.DEFAULT){
 				// waiting to apply
 				assertPropStateClass(prop, 'waiting');
-				if(checkTick >= targetTick || scrollY >= scrollHeight){
+				if(scrollHeight && (checkTick >= targetTick || scrollY >= scrollHeight)){
 					// wait is over
 					// advance to APPLYING state
 					propState[prop].state = PROP_STATES.APPLYING;
