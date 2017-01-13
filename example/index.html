@@ -191,7 +191,7 @@
             <div class="demo line" ng-scrollable-style="{ delay:{on:'@0',off:'@100%'}, delta:'100%', 'width':{init:'0%',apply:'100%'}, 'backgroundColor':{init:'#09F',apply:'#FFF'}, 'borderColor':{init:'#FFF',apply:'#000'}, 'borderWidth':{init:'4px',apply:'1px'} }" ng-scrollable-style-on-child="true" ng-scrollable-style-enabled="{{enableScrollStyles}}"><div></div></div>
         </div>
         <div class="body" ng-if="showDemo">
-            <div class="demo bar top" ng-scrollable-style="{ 'marginTop':{init:'0px',apply:'-$height$px',delay:{on:64,off:16}}, 'opacity':{init:1.0,apply:0.75,delta:{on:50,off:16}} }" ng-scrollable-style-enabled="{{enableScrollStyles}}">
+            <div class="demo bar top" ng-scrollable-style="{ 'marginTop':{init:'0px',apply:'-$height$px',delay:{on:64,off:16}}, 'opacity':{init:1.0,apply:0.75,delta:{on:50,off:16}} }" ng-scrollable-style-force="{ 'scroll':{ 0:'init',100:'apply'}, 'hover':'init' }" ng-scrollable-style-enabled="{{enableScrollStyles}}">
             </div>
 
             <div class="sliders">

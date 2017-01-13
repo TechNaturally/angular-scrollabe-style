@@ -6,7 +6,13 @@ angular.module('angular-scrollable-style', [])
 	self.enabled;
 	self.defaultConfig = {
 		delay: 0,
-		delta: 0
+		delta: 0,
+		force: {
+			scroll: {
+				0: 'init',
+				100: 'apply'
+			}
+		}
 	};
 
 	var origCss = {};
@@ -55,6 +61,10 @@ angular.module('angular-scrollable-style', [])
 			opt = opt.substr(0, opt.length-4);
 			subOpt = 'off';
 		}
+		else if(opt.substr(0, 6) == 'force.'){
+			subOpt = opt.substr(6);
+			opt = 'force';
+		}
 
 		// get best-matching value
 		var value;
@@ -69,8 +79,8 @@ angular.module('angular-scrollable-style', [])
 		}
 
 		// handle subOpt
-		if(subOpt && angular.isObject(value) && angular.isDefined(value[subOpt])){
-			value = value[subOpt];
+		if(subOpt && angular.isObject(value)){
+			value = (angular.isDefined(value[subOpt]) ? value[subOpt] : undefined);
 		}
 
 		return value;
@@ -189,6 +199,79 @@ angular.module('angular-scrollable-style', [])
 
 		if(propState[prop]){
 			propState[prop].stateClass = targetClass;
+		}
+	}
+
+	function assertPropForceState(prop, scrollY, scrollHeight){
+		if(!self.enabled){
+			return;
+		}
+		if(self.style && prop && self.style[prop]){
+			// assert scroll information
+			if(angular.isUndefined(scrollY)){
+				scrollY = lastScroll;
+			}
+			if(angular.isUndefined(scrollHeight)){
+				scrollHeight = getScrollHeight();
+			}
+
+			// check for an applicable force state
+			var force_state;
+
+			// handle hover force state
+			if(self.$elementHovered){
+				var force_hover = getPropConfigValue(prop, 'force.hover');
+				if(force_hover){
+					force_state = force_hover;
+				}
+			}
+
+			// handle scroll force state
+			if(!force_state){
+				var force_scroll = getPropConfigValue(prop, 'force.scroll');
+				if(force_scroll){
+					if(!scrollY && angular.isDefined(force_scroll[0])){
+						force_state = force_scroll[0];
+					}
+					else if(scrollHeight && scrollY >= scrollHeight && angular.isDefined(force_scroll[100])){
+						force_state = force_scroll[100];
+					}
+				}
+			}
+
+			// process force state
+			if(force_state){
+				var state_applied = false;
+				if(force_state == 'init'){
+					propState[prop].state = PROP_STATES.DEFAULT;
+					propState[prop].ticks = 0;
+					self.applyStyle(prop, 0.0);
+					assertPropStateClass(prop, 'waiting');
+					state_applied = true;
+				}
+				else if(force_state == 'apply'){
+					propState[prop].state = PROP_STATES.APPLIED;
+					propState[prop].ticks = 0;
+					self.applyStyle(prop, 1.0);
+					assertPropStateClass(prop, 'applied');
+					state_applied = true;
+				}
+				return state_applied;
+			}
+		}
+		return false;
+	}
+	function assertPropForceStates(){
+		if(!self.enabled){
+			return;
+		}
+		if(self.style){
+			for(var prop in self.style){
+				if(!self.style[prop]){
+					continue;
+				}
+				assertPropForceState(prop);
+			}
 		}
 	}
 
@@ -355,8 +438,11 @@ angular.module('angular-scrollable-style', [])
 					}
 				}
 
-				// pass the scroll event off to the state-handler
-				handlePropState(prop, scrollDelta, scrollY, scrollHeight);
+				// check if a state should be forced
+				if(!assertPropForceState(prop, scrollY, scrollHeight)){
+					// pass the scroll event off to the state-handler
+					handlePropState(prop, scrollDelta, scrollY, scrollHeight);
+				}
 			}
 		}
 		lastScrollDelta = scrollDelta;
@@ -389,6 +475,9 @@ angular.module('angular-scrollable-style', [])
 
 				// apply default waiting class
 				assertPropStateClass(prop, 'waiting');
+
+				// check if a state should be forced
+				assertPropForceState(prop);
 			}
 		}
 	}
@@ -399,10 +488,27 @@ angular.module('angular-scrollable-style', [])
 		}
 		if(self.$element){
 			self.$element.addClass('scrollable-style');
+			self.$elementHovered = (angular.isFunction(self.$element.is) && self.$element.is(':hover'));
+			self.$element.on('mouseenter', elementHovered);
+			self.$element.on('mouseover', elementHovered);
+			self.$element.on('mouseleave', elementUnhovered);
+
 			origCss = {};
 			if(self.initialized){
 				initPropStates();
 			}
+		}
+	}
+	function elementHovered(){
+		if(!self.$elementHovered){
+			self.$elementHovered = true;
+			assertPropForceStates();
+		}
+	}
+	function elementUnhovered(){
+		if(self.$elementHovered){
+			self.$elementHovered = false;
+			assertPropForceStates();
 		}
 	}
 	function setCss(prop, value){
@@ -425,6 +531,10 @@ angular.module('angular-scrollable-style', [])
 			resetCss();
 			self.$element.removeClass('scrollable-style');
 			self.$element[0].className = self.$element[0].className.replace(/(^|\s)scrollable-style-\S+/g, '');
+			self.$elementHovered = undefined;
+			self.$element.off('mouseenter', elementHovered);
+			self.$element.off('mouseover', elementHovered);
+			self.$element.off('mouseleave', elementUnhovered);
 		}
 	}
 	function resetPropStates(){
@@ -484,13 +594,17 @@ angular.module('angular-scrollable-style', [])
 	self.setScrollableStyle = function(style){
 		self.styleConfig = {
 			delay: (angular.isDefined(style.delay) ? style.delay : undefined),
-			delta: (angular.isDefined(style.delta) ? style.delta : undefined)
+			delta: (angular.isDefined(style.delta) ? style.delta : undefined),
+			force: (angular.isDefined(style.force) ? style.force : undefined)
 		};
 		if(angular.isDefined(style.delay)){
 			style.delay = undefined;
 		}
 		if(angular.isDefined(style.delta)){
 			style.delta = undefined;
+		}
+		if(angular.isDefined(style.force)){
+			style.force = undefined;
 		}
 		self.style = style;
 	};
@@ -505,6 +619,17 @@ angular.module('angular-scrollable-style', [])
 			delta = 0;
 		}
 		self.defaultConfig.delta = delta;
+	};
+	self.setDefaultForce = function(force){
+		if(!force){
+			force = {
+				scroll: {
+					0: 'init',
+					100: 'apply'
+				}
+			};
+		}
+		self.defaultConfig.force = force;
 	};
 	self.setElement = function(element){
 		resetElement();
@@ -561,6 +686,9 @@ angular.module('angular-scrollable-style', [])
 				setDelta(attr['ngScrollableStyleDelta']);
 				attr.$observe('ngScrollableStyleDelta', setDelta);
 
+				setForce(attr['ngScrollableStyleForce']);
+				attr.$observe('ngScrollableStyleForce', setForce);
+
 				Ctrl.setInitialized(true);
 			}
 
@@ -593,6 +721,13 @@ angular.module('angular-scrollable-style', [])
 					delta = scope.$eval(delta);
 				}
 				Ctrl.setDefaultDelta(delta);
+			}
+
+			function setForce(force){
+				if(angular.isDefined(force)){
+					force = scope.$eval(force);
+				}
+				Ctrl.setDefaultForce(force);
 			}
 
 			function setStyleOnChild(onChild){
