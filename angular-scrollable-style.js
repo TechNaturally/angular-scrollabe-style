@@ -137,7 +137,7 @@ angular.module('angular-scrollable-style', [])
 			else{
 				// numerical value with optional unit
 				value = parseFloat(cssValue);
-				unit = cssValue.replace(''+value, '');
+				unit = cssValue.replace(''+value, '').replace('-', '');
 			}
 		}
 		return { value: value, unit: unit };
@@ -180,6 +180,7 @@ angular.module('angular-scrollable-style', [])
 					setCss(prop, value);
 				}
 				else{
+					resetCss(prop);
 					throw new Error('Invalid CSS value pair: "'+propStyle.init+'" and "'+propStyle.apply+'"');
 				}
 			}
@@ -519,9 +520,14 @@ angular.module('angular-scrollable-style', [])
 			self.$element.css(prop, value);
 		}
 	}
-	function resetCss(){
+	function resetCss(prop){
 		if(self.$element){
-			for(var prop in origCss){
+			if(angular.isUndefined(prop)){
+				for(var prop in origCss){
+					self.$element.css(prop, origCss[prop]);
+				}
+			}
+			else if(angular.isDefined(origCss[prop])){
 				self.$element.css(prop, origCss[prop]);
 			}
 		}
